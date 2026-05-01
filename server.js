@@ -46,9 +46,30 @@ app.get('/api/health/db', async (req, res) => {
     res.status(503).json({
       status: 'ERROR',
       database: 'unavailable',
+      code: error.code || 'UNKNOWN',
       message: '資料庫目前不可用，請檢查 Render 環境變數與資料庫連線設定。',
     });
   }
+});
+
+app.get('/api/health/config', (req, res) => {
+  let databaseHost = null;
+  try {
+    databaseHost = process.env.DATABASE_URL
+      ? new URL(process.env.DATABASE_URL).hostname
+      : null;
+  } catch {
+    databaseHost = 'invalid-url';
+  }
+
+  res.json({
+    status: 'OK',
+    env: process.env.NODE_ENV || 'unset',
+    hasDatabaseUrl: Boolean(process.env.DATABASE_URL),
+    databaseHost,
+    hasJwtSecret: Boolean(process.env.JWT_SECRET),
+    hasJwtRefreshSecret: Boolean(process.env.JWT_REFRESH_SECRET),
+  });
 });
 
 app.use('/api', routes);

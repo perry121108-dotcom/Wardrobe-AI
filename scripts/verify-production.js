@@ -2,6 +2,7 @@ const baseUrl = process.argv[2] || 'https://wardrobe-ai-backend-a3fl.onrender.co
 
 const checks = [
   '/api/test',
+  '/api/health/config',
   '/api/health/db',
   '/api/meta/seasons',
   '/api/meta/occasions',

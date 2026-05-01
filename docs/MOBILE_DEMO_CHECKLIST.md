@@ -20,6 +20,7 @@ API base URL：
 4. 如使用 Supabase RLS，已套用 `db/rls_supabase_fix.sql`。
 5. 以下網址皆回 `200`：
    - `https://wardrobe-ai-backend-a3fl.onrender.com/api/test`
+   - `https://wardrobe-ai-backend-a3fl.onrender.com/api/health/config`
    - `https://wardrobe-ai-backend-a3fl.onrender.com/api/health/db`
    - `https://wardrobe-ai-backend-a3fl.onrender.com/api/meta/seasons`
 6. 手機外部網路可開啟正式網址，不依賴本機 Wi-Fi 或 localhost。
@@ -41,3 +42,25 @@ API base URL：
 3. `color_seasons` 是否有 `season_key, season_name, family, undertone, clarity, keywords` 欄位。
 4. 線上部署是否已經使用目前 repo 的最新 `server.js` 和 `api/routes.js`。
 5. Supabase RLS 是否阻擋 anonymous / service connection 讀取參考資料表。
+
+## 既有 Render 服務設定
+
+目前既有 Render service 的 build log 顯示 Build Command 仍是：
+
+```bash
+npm install
+```
+
+若不改 Build Command，Render 只會安裝 backend dependency，不會輸出 `mobile/dist`，手機 PWA 靜態檔可能不會跟著部署。
+
+建議改成：
+
+```bash
+npm ci && cd mobile && npm ci && npm run build:web
+```
+
+Start Command 維持：
+
+```bash
+npm start
+```
