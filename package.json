@@ -5,6 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "security:apply-rls": "node scripts/apply-rls.js",
+    "verify:production": "node scripts/verify-production.js",
     "test": "node test-v3.4.js"
   },
   "keywords": [],

@@ -25,7 +25,12 @@
       "package": "com.kadiuy.wardrobeai"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "name": "Wardrobe AI",
+      "shortName": "WardrobeAI",
+      "themeColor": "#111827",
+      "backgroundColor": "#ffffff",
+      "bundler": "metro"
     },
     "extra": {
       "eas": {

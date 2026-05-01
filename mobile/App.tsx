@@ -28,6 +28,23 @@ export default function App() {
     fetch(`${API_BASE_URL}/test`).catch(() => {});
   }, []);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .getRegistrations()
+        .then(registrations => registrations.forEach(reg => reg.unregister()))
+        .catch(() => {});
+    }
+
+    if ('caches' in window) {
+      caches.keys()
+        .then(keys => keys.forEach(key => caches.delete(key)))
+        .catch(() => {});
+    }
+  }, []);
+
   // On launch: check if a valid access_token exists
   useEffect(() => {
     AsyncStorage.getItem('access_token')

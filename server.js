@@ -1,9 +1,19 @@
 require('dotenv').config();
-const express   = require('express');
+const express = require('express');
 const rateLimit = require('express-rate-limit');
-const cors      = require('cors');
-const routes    = require('./api/routes');
-const app       = express();
+const cors = require('cors');
+const { Pool } = require('pg');
+const routes = require('./api/routes');
+const path = require('path');
+const fs = require('fs');
+
+const app = express();
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.DATABASE_URL?.includes('supabase')
+    ? { rejectUnauthorized: false }
+    : false,
+});
 
 app.set('trust proxy', 1);
 
@@ -14,14 +24,53 @@ const limiter = rateLimit({
   legacyHeaders: false,
   validate: { xForwardedForHeader: false },
 });
+
 app.use(limiter);
 app.use(cors());
 app.use(express.json());
 
 app.get('/api/test', (req, res) => {
-  res.json({ message: "後端連線成功！", status: "OK" });
+  res.json({ message: '後端連線成功！', status: 'OK' });
+});
+
+app.get('/api/health/db', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT NOW() AS server_time');
+    res.json({
+      status: 'OK',
+      database: 'connected',
+      server_time: result.rows[0].server_time,
+    });
+  } catch (error) {
+    console.error('Database health check failed:', error);
+    res.status(503).json({
+      status: 'ERROR',
+      database: 'unavailable',
+      message: '資料庫目前不可用，請檢查 Render 環境變數與資料庫連線設定。',
+    });
+  }
 });
 
 app.use('/api', routes);
+
+const webDistDir = path.join(__dirname, 'mobile', 'dist');
+if (fs.existsSync(webDistDir)) {
+  app.use(express.static(webDistDir, { index: false }));
+
+  app.get('/', (req, res) => {
+    res.sendFile(path.join(webDistDir, 'index.html'));
+  });
+
+  app.get('/:path', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+
+    res.sendFile(path.join(webDistDir, 'index.html'));
+  });
+}
+
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, '0.0.0.0', () => console.log('Server running on port ' + PORT));
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
+});

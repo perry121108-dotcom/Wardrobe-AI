@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: wardrobe-ai
+    runtime: node
+    plan: free
+    branch: master
+    buildCommand: npm ci && cd mobile && npm ci && npm run build:web
+    startCommand: npm start
+    healthCheckPath: /api/test
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false

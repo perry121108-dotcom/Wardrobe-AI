@@ -391,18 +391,39 @@ router.post('/outfits/feedback', auth, async (req, res) => {
 // ─────────────────────────────────────────
 
 router.get('/meta/seasons', async (req, res) => {
-  const result = await pool.query('SELECT season_key, season_name, family, undertone, clarity, keywords FROM color_seasons ORDER BY family, id');
-  res.json({ seasons: result.rows });
+  try {
+    const result = await pool.query(
+      'SELECT season_key, season_name, family, undertone, clarity, keywords FROM color_seasons ORDER BY family, id'
+    );
+    res.json({ seasons: result.rows });
+  } catch (err) {
+    console.error('GET /meta/seasons failed:', err);
+    res.status(500).json({ error: '讀取色彩季型資料失敗，請檢查資料庫部署狀態。' });
+  }
 });
 
 router.get('/meta/occasions', async (req, res) => {
-  const result = await pool.query('SELECT occasion_key, occasion_name, goal FROM occasion_strategies');
-  res.json({ occasions: result.rows });
+  try {
+    const result = await pool.query(
+      'SELECT occasion_key, occasion_name, goal FROM occasion_strategies'
+    );
+    res.json({ occasions: result.rows });
+  } catch (err) {
+    console.error('GET /meta/occasions failed:', err);
+    res.status(500).json({ error: '讀取場合策略資料失敗，請檢查資料庫部署狀態。' });
+  }
 });
 
 router.get('/meta/materials', async (req, res) => {
-  const result = await pool.query('SELECT material_key, material_name, gloss_level, touch_quality, best_saturation FROM material_types');
-  res.json({ materials: result.rows });
+  try {
+    const result = await pool.query(
+      'SELECT material_key, material_name, gloss_level, touch_quality, best_saturation FROM material_types'
+    );
+    res.json({ materials: result.rows });
+  } catch (err) {
+    console.error('GET /meta/materials failed:', err);
+    res.status(500).json({ error: '讀取材質資料失敗，請檢查資料庫部署狀態。' });
+  }
 });
 
 router.get('/meta/demo-wardrobe', async (req, res) => {

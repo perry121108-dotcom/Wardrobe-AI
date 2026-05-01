@@ -1,130 +1,93 @@
-# WARDROBE AI — CLAUDE.md  v3.2 最終版
-# 把此檔放在專案根目錄，Claude Code 自動讀取
+# WARDROBE AI
 
-## 專案簡介
-女性衣橱管理 App。推薦引擎基於色彩/材質/廓形研究報告規則庫，**零 AI API 費用**。
-技術棧：Node.js + Express + PostgreSQL + React Native (Expo)
+WARDROBE AI 是一個以「個人化穿搭推薦」為核心的 AI 衣櫥助理。
+專案重點不是單純管理衣服，而是把使用者的色彩季型、膚色底調、體型、場合與季節轉換成可執行的穿搭建議。
 
-## 目錄結構
-```
-wardrobe-app/
-├── db/
-│   └── schema_final.sql         ← 執行此檔建立全部18張表
-├── engine/
-│   ├── recommender.js           ← 主推薦引擎（三維評分）
-│   ├── material_scorer.js       ← 材質評分模組
-│   └── silhouette_scorer.js     ← 廓形評分模組
-├── api/
-│   └── routes.js                ← Express 路由（含 Rate Limit + JWT）
-├── mobile/                      ← React Native (Expo)
-├── .env                         ← 環境變數（見下方）
-└── CLAUDE.md                    ← 本檔案
-```
+目前版本已由 APK 展示改為 PWA，方便在 iPhone Safari、Android 與桌面瀏覽器直接開啟使用。
 
----
+## 手機隨身展示目標
 
-## ❌ 禁止事項（違反即停止）
-1. **不可**呼叫任何 AI API（OpenAI / Gemini / Anthropic）做推薦計算
-2. **不可**刪除 schema_final.sql 中的規則預填資料
-3. **不可**在 recommender.js / material_scorer.js / silhouette_scorer.js 外重複實作評分邏輯
-4. **不可**使用字串拼接 SQL（一律 parameterized query）
-5. **不可**更改下方任何固定值域的枚舉值
-6. **不可**移除 JWT auth 中間件（/auth/* 和 /meta/* 除外）
+這個專案接下來的展示目標，是讓正式部署網址在手機上隨時可開啟，成為可以在外面直接拿給別人看的隨身作品。
 
----
+展示標準：
 
-## 固定值域（所有欄位的允許值）
+- iPhone Safari / Android Chrome 可直接開啟。
+- 不需要安裝 APK。
+- 推薦頁、冷啟動畫面、個人設定與衣櫥頁可穩定瀏覽。
+- Render 線上 API 與資料庫 endpoint 需要穩定，不能只依賴本機展示。
 
-| 欄位 | 允許值 |
-|------|--------|
-| `category` | `inner_top` / `top` / `outer` / `bottom` / `accessory` |
-| `layer_order` | `1`（內搭）/ `2`（上衣）/ `3`（外套）|
-| `fit_type` | `oversized` / `slim` / `regular` / `cropped` |
-| `silhouette`（上衣/外套）| `oversized` / `regular` / `slim` / `cropped` / `peplum` / `wrap` / `off_shoulder` |
-| `silhouette`（下身）| `wide_leg` / `straight` / `slim_fit` / `a_line` / `pencil` / `mini` / `maxi` |
-| `material_key` | `silk_satin` / `silk_crepe` / `silk_georgette` / `wool_fine` / `wool_coarse` / `cashmere` / `cotton` / `linen` / `cotton_linen` / `leather_matte` / `leather_patent` / `knit_chunky` / `knit_fine` / `acetate` / `polyester` / `nylon` / `velvet` / `denim` / `chiffon` / `organza` |
-| `pattern_type` | `solid` / `stripe` / `check` / `dot` / `floral` / `geometric` / `abstract` / `print_multi` |
-| `drape_level` | `high` / `medium` / `low` / `none` |
-| `skin_tone` | `cool_white` / `warm_yellow` / `wheat_tan` / `neutral` |
-| `body_type` | `upper_heavy` / `pear_shape` / `balanced` |
-| `occasion` | `work_interview` / `work_presentation` / `work_creative` / `work_daily` / `date_first` / `date_casual` / `casual` / `outdoor` / `party` / `sport` |
-| `season` | `spring` / `summer` / `autumn` / `winter` |
-| `color_season` | `bright_spring` / `true_spring` / `light_spring` / `light_summer` / `true_summer` / `soft_summer` / `soft_autumn` / `true_autumn` / `deep_autumn` / `deep_winter` / `true_winter` / `bright_winter` |
+## 核心功能
 
----
+- 冷啟動推薦：衣櫥還沒有資料時，也能依照個人設定產生色彩引導。
+- 12 色季系統：亮春、純春、淡春、淡夏、純夏、柔夏、柔秋、純秋、深秋、深冬、純冬、亮冬。
+- 個人設定：膚色底調、體型、色彩季型會影響推薦邏輯。
+- 場合推薦：面試、簡報、創意辦公、約會、休閒、戶外、派對、運動等情境。
+- 季節推薦：春、夏、秋、冬。
+- 廓形建議：依照體型給出上衣與下身輪廓建議。
+- PWA 展示：不再依賴 APK，可用手機瀏覽器直接操作。
 
-## clothing_items.colors 格式（JSONB）
-```json
-[{ "hex": "#FF7F50", "ratio": 0.6 }, { "hex": "#FFFFFF", "ratio": 0.4 }]
-```
-- 按面積佔比由大到小排序
-- `colors[0]` 為主色，存入時同步計算 `hsl_h` / `hsl_s` / `hsl_l`
-- `colors[0].ratio < 0.35` → `is_pattern = true`
+## 展示畫面
 
----
+### 穿搭推薦
 
-## 推薦引擎架構（三維評分）
+![穿搭推薦](assets/github/screenshots/01-recommend-select-full.png)
 
-### 最終評分公式
-```
-最終分數 = 色彩分 × 0.50 + 材質分 × 0.25 + 廓形分 × 0.25
+### 冷啟動色彩引導
+
+![冷啟動色彩引導](assets/github/screenshots/02-cold-start-guide-full.png)
+
+### 個人設定
+
+![個人設定](assets/github/screenshots/03-personal-settings-full.png)
+
+### 我的衣櫥
+
+![我的衣櫥](assets/github/screenshots/04-wardrobe-empty-full.png)
+
+## 技術架構
+
+- Frontend: Expo, React Native, TypeScript, Expo Web / PWA
+- Backend: Node.js, Express
+- Database: PostgreSQL / Supabase
+- Auth: JWT access token, refresh token
+- Recommendation Engine: 色彩規則、材質規則、廓形規則、場合策略
+- Deployment Target: Render + PWA
+
+## 本機啟動
+
+```bash
+npm install
+npm start
 ```
 
-### 色彩評分（recommender.js）
-- 三維：色相差（×0.5）+ 飽和度調整（×0.3）+ 明度對比（×0.2）
-- 動態季節權重：spring/summer 外層55%/內層45%；autumn/winter 外層70%/內層30%
-- 多層加成 +0.5；用戶個人權重（v1.5）
+PWA build:
 
-### 材質評分（material_scorer.js）
-- 四大交互法則：同色異質(+0.5) / 異色同質(+0.3) / 光澤對比(+0.5) / 肌理對比(+0.3)
-- 材質×色彩相容性懲罰（低飽和材質配高飽和色 -1.0）
-- 材質×場合加分（+0.3）
-
-### 廓形評分（silhouette_scorer.js）
-- 組合評分：slim×wide_leg 和 cropped×wide_leg 滿分10
-- 體型加分：符合 upper_heavy/pear_shape 規則 +0.5，違反 -0.8
-- 場合加分：+0.3
-
-### 降級機制（場合永遠不放寬）
-- Lv0 正常 → Lv1 放寬季節 → Lv2 分數≥0.5 → Lv3 歷史記錄 → Lv4 冷啟動
-
----
-
-## API 規範
-- `/wardrobe` / `/recommend` / `/outfits` → 必須 JWT auth
-- `/auth/*` / `/meta/*` → 不需驗證
-- Rate Limit：`/auth/login` 5次/分/IP；`/recommend` 30次/分/用戶
-- JWT：`access_token` 7d + `refresh_token` 30d
-- `POST /recommend` 必須回傳 `accessories`（hat/shoes/bag hex）+ `analysis`
-
----
-
-## .env 必要變數
-```
-DATABASE_URL=postgresql://user:pass@localhost:5432/wardrobe
-JWT_SECRET=your_access_secret_here
-JWT_REFRESH_SECRET=your_refresh_secret_here
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-PORT=3000
+```bash
+cd mobile
+npm install
+npm run build:web
 ```
 
----
+伺服器會同時提供 API 與 PWA 靜態檔案。
 
-## 開發進度 Checklist
-- [x] schema_final.sql（18 張表 + 所有規則預填）
-- [x] recommender.js（三維評分 + 4級降級）
-- [x] material_scorer.js（20種材質 + 4大法則）
-- [x] silhouette_scorer.js（廓形組合 + 體型修飾）
-- [x] routes.js（完整 API + Rate Limit + JWT Refresh）
-- [x] 執行 schema_final.sql 建立資料庫
-- [x] 安裝依賴：npm install express pg bcrypt jsonwebtoken express-rate-limit
-- [x] 驗收測試（見 TASK.md）
-- [x] React Native 前端 — 衣橱頁（含 material_key / silhouette 下拉選單）
-- [x] React Native 前端 — 推薦頁
-- [x] React Native 前端 — 穿搭紀錄頁
-- [x] K-means 顏色辨識（200×200 + 取色框 + 二次確認）
-- [x] expo-image-manipulator WebP 壓縮
-- [x] 3 題色季快速測驗
-- [ ] App Store / Play Store 上架
+## 線上展示驗證
+
+```bash
+npm run verify:production
+```
+
+目前正式展示目標是讓 Render URL 在手機外部網路也能穩定開啟。驗收細節見：
+
+- `docs/MOBILE_DEMO_CHECKLIST.md`
+- `RENDER_FIX_CHECKLIST.md`
+
+## 目前狀態
+
+30 天計畫中，WARDROBE AI 已完成第一週的主要展示目標：
+
+- App 可登入或進入展示模式。
+- PWA 可開啟，不再依賴 APK。
+- 推薦頁、冷啟動畫面、個人設定與衣櫥頁已可展示。
+- GitHub README 已補上中文說明與展示截圖。
+
+下一步會進入部署與作品包裝階段：Render 穩定部署、GitHub repo topics/description、Demo URL 與 release note。

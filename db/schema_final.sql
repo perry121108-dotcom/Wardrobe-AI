@@ -440,3 +440,29 @@ INSERT INTO pattern_rules (pattern_type, pairing_rule, color_tip) VALUES
 ('geometric',   '幾何圖案搭素色；強烈幾何可搭細條紋', '幾何圖案已有設計感，配色選中性色'),
 ('abstract',    '抽象圖案搭素色中性色，讓圖案說話', '選圖案中最低調的顏色作配對色'),
 ('print_multi', '多色印花搭素色，取印花中最低調的顏色做配對', '避免再加任何有色圖案');
+-- ============================================================
+-- Supabase security: enable Row Level Security on public tables
+-- Keep data access through the Express API. Do not add broad
+-- anon/authenticated policies unless the mobile app intentionally
+-- starts using Supabase direct table APIs.
+-- ============================================================
+
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.clothing_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.outfit_records ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_color_preferences ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE public.color_rules ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.color_seasons ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.occasion_strategies ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.color_combos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.trend_colors ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.material_types ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.material_color_laws ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.hue_material_sensitivity ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.occasion_material_strategy ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.silhouette_body_rules ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.silhouette_occasion_rules ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.silhouette_combo_rules ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.material_body_rules ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.pattern_rules ENABLE ROW LEVEL SECURITY;
