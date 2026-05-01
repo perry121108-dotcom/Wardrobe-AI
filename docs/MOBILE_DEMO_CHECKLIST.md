@@ -43,6 +43,50 @@ API base URL：
 4. 線上部署是否已經使用目前 repo 的最新 `server.js` 和 `api/routes.js`。
 5. Supabase RLS 是否阻擋 anonymous / service connection 讀取參考資料表。
 
+## 若 `/api/health/db` 回 `ENETUNREACH`
+
+目前 Render 回傳：
+
+```json
+{
+  "database": "unavailable",
+  "code": "ENETUNREACH"
+}
+```
+
+且 `/api/health/config` 顯示：
+
+```json
+{
+  "hasDatabaseUrl": true,
+  "databaseHost": "db.bnrlaxzkjvgmisadyzuw.supabase.co"
+}
+```
+
+這代表 Render 已經有 `DATABASE_URL`，但目前使用的是 Supabase direct database host。Supabase direct connection 預設使用 IPv6；Render 不支援 IPv6 direct database connection 時，會出現網路不可達。
+
+修法：
+
+1. 到 Supabase Dashboard。
+2. 打開 `Wardrobe AI` project。
+3. 點 `Connect`。
+4. 選 `Session pooler` connection string。
+5. 複製 connection string，替換 `[YOUR-PASSWORD]`。
+6. 到 Render service 的 Environment，把 `DATABASE_URL` 改成 Session pooler connection string。
+7. Redeploy。
+
+Session pooler 格式大致如下：
+
+```text
+postgres://postgres.bnrlaxzkjvgmisadyzuw:[YOUR-PASSWORD]@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres
+```
+
+不要再使用 direct host：
+
+```text
+postgresql://postgres:[YOUR-PASSWORD]@db.bnrlaxzkjvgmisadyzuw.supabase.co:5432/postgres
+```
+
 ## 既有 Render 服務設定
 
 目前既有 Render service 的 build log 顯示 Build Command 仍是：
