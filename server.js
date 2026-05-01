@@ -54,10 +54,17 @@ app.get('/api/health/db', async (req, res) => {
 
 app.get('/api/health/config', (req, res) => {
   let databaseHost = null;
+  let databaseUser = null;
+  let databasePort = null;
+  let databaseName = null;
   try {
-    databaseHost = process.env.DATABASE_URL
-      ? new URL(process.env.DATABASE_URL).hostname
-      : null;
+    if (process.env.DATABASE_URL) {
+      const databaseUrl = new URL(process.env.DATABASE_URL);
+      databaseHost = databaseUrl.hostname;
+      databaseUser = databaseUrl.username;
+      databasePort = databaseUrl.port || null;
+      databaseName = databaseUrl.pathname.replace(/^\//, '') || null;
+    }
   } catch {
     databaseHost = 'invalid-url';
   }
@@ -67,6 +74,9 @@ app.get('/api/health/config', (req, res) => {
     env: process.env.NODE_ENV || 'unset',
     hasDatabaseUrl: Boolean(process.env.DATABASE_URL),
     databaseHost,
+    databaseUser,
+    databasePort,
+    databaseName,
     hasJwtSecret: Boolean(process.env.JWT_SECRET),
     hasJwtRefreshSecret: Boolean(process.env.JWT_REFRESH_SECRET),
   });
