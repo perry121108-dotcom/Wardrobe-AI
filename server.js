@@ -78,6 +78,8 @@ app.get('/api/health/config', (req, res) => {
   res.json({
     status: 'OK',
     env: process.env.NODE_ENV || 'unset',
+    diagnosticsVersion: 2,
+    renderGitCommit: process.env.RENDER_GIT_COMMIT || process.env.RENDER_COMMIT || null,
     hasDatabaseUrl: Boolean(process.env.DATABASE_URL),
     databaseHost,
     databaseUser,
