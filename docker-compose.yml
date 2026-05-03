@@ -1,0 +1,27 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_URL: postgresql://wardrobe:wardrobe@postgres:5432/wardrobe_ai
+      JWT_SECRET: local-development-secret
+      JWT_REFRESH_SECRET: local-refresh-secret
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: wardrobe_ai
+      POSTGRES_USER: wardrobe
+      POSTGRES_PASSWORD: wardrobe
+    ports:
+      - "5432:5432"
+    volumes:
+      - wardrobe_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  wardrobe_postgres_data:

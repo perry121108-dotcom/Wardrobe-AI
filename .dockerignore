@@ -1,0 +1,10 @@
+node_modules
+mobile/node_modules
+.git
+.github
+.env
+*.log
+cache
+tmp
+files.zip
+mobile/dist
