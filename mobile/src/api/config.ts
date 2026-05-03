@@ -1,4 +1,4 @@
-const REMOTE_API_BASE_URL = 'https://wardrobe-ai-backend-a3fl.onrender.com/api';
+const REMOTE_API_BASE_URL = 'https://wardrobe-ai-pwa-v2.onrender.com/api';
 const LOCAL_BACKEND_PORT = '3000';
 
 function resolveWebApiBaseUrl(): string {

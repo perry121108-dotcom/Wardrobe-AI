@@ -1,6 +1,6 @@
 # WARDROBE AI Fresh Infra Rebuild
 
-Status: database verified, Render service creation pending Render MCP/API access.
+Status: complete. Fresh Supabase database and fresh Render service are verified.
 
 ## New Supabase Database
 
@@ -90,6 +90,12 @@ Target service name:
 wardrobe-ai-pwa-v2
 ```
 
+Production URL:
+
+```text
+https://wardrobe-ai-pwa-v2.onrender.com
+```
+
 GitHub repo:
 
 ```text
@@ -137,16 +143,16 @@ JWT_REFRESH_SECRET=<new random refresh secret>
 
 ## Post-Deploy Verification
 
-After Render deploys, verify these endpoints:
+Verified endpoints:
 
 ```text
-https://<new-render-url>/
-https://<new-render-url>/api/test
-https://<new-render-url>/api/health/config
-https://<new-render-url>/api/health/db
-https://<new-render-url>/api/meta/seasons
-https://<new-render-url>/api/meta/occasions
-https://<new-render-url>/api/meta/materials
+https://wardrobe-ai-pwa-v2.onrender.com/
+https://wardrobe-ai-pwa-v2.onrender.com/api/test
+https://wardrobe-ai-pwa-v2.onrender.com/api/health/config
+https://wardrobe-ai-pwa-v2.onrender.com/api/health/db
+https://wardrobe-ai-pwa-v2.onrender.com/api/meta/seasons
+https://wardrobe-ai-pwa-v2.onrender.com/api/meta/occasions
+https://wardrobe-ai-pwa-v2.onrender.com/api/meta/materials
 ```
 
 Expected result:
@@ -161,22 +167,19 @@ Expected result:
 /api/meta/materials => 200, 20 records
 ```
 
-## Current Tooling Limitation
+## Final Verification
 
-Supabase MCP is authorized and working.
+Render deployed commit:
 
-Render MCP is visible as a plugin, but service-management tools such as `list_services`, `create_service`, env var editing, and deploy triggering are not currently exposed in this Codex session. Render CLI is also not installed locally.
-
-To let Codex create the Render service directly, configure Render MCP with a Render API key and restart Codex:
-
-```bash
-codex mcp add render --url https://mcp.render.com/mcp --bearer-token-env-var RENDER_API_KEY
+```text
+883009d9ab92abe1657753a1716b94653cc81180
 ```
 
-Then set:
+Production database health:
 
-```bash
-RENDER_API_KEY=<your Render API key>
+```text
+database: connected
+databaseHost: aws-1-ap-northeast-1.pooler.supabase.com
+databaseUser: wardrobe_app_v2.neoydhdvaealtsicwvzg
+databaseName: postgres
 ```
-
-Until Render MCP/API access is available, create the service in the Render Dashboard using the settings above.

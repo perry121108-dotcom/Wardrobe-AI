@@ -1,4 +1,4 @@
-const baseUrl = process.argv[2] || 'https://wardrobe-ai-backend-a3fl.onrender.com';
+const baseUrl = process.argv[2] || 'https://wardrobe-ai-pwa-v2.onrender.com';
 
 const checks = [
   '/api/test',

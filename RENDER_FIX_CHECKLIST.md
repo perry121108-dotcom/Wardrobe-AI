@@ -1,56 +1,54 @@
-# WARDROBE AI Render 修復清單
+# Render Production Fix Record
 
-## 目前診斷結果
+Status: fixed and verified on 2026-05-03.
 
-- 本機程式正常
-- 本機 `.env` 正常
-- 本機 `/api/meta/seasons` 正常
-- 本機 `/api/health/db` 正常
-- Render 線上 `/api/test` 正常
-- Render 線上 `/api/meta/seasons` 仍然回 `500`
+Production URL:
 
-這代表目前剩下的問題高度可能在 Render 端：
+```text
+https://wardrobe-ai-pwa-v2.onrender.com
+```
 
-- `DATABASE_URL` 錯誤
-- 線上部署版本不是目前本機這版
-- Render 環境變數不完整
-- Render 服務尚未重新部署到最新 backend 狀態
+## What Was Fixed
 
-## 修復步驟
+The old Render service could serve part of the app, but database-backed endpoints were unreliable because the deployment and Supabase connection path were tangled with old environment settings.
 
-1. 使用目前 `D:\WARDROBE AI` 的程式碼重新部署 Render backend
-2. 確認 Render 環境變數存在且正確：
-   - `DATABASE_URL`
-   - `JWT_SECRET`
-   - `JWT_REFRESH_SECRET`
-   - `PORT`
-3. 部署後驗證：
-   - `/api/test`
-   - `/api/health/db`
-   - `/api/meta/seasons`
-4. 以上三個都正常後，再測試：
-   - register
-   - login
-   - wardrobe fetch
+The fix was to create a clean production path:
 
-## 預期結果
+1. Create a fresh Supabase project.
+2. Apply the WARDROBE AI core schema.
+3. Seed reference tables.
+4. Create a backend-only database role.
+5. Verify Supabase session pooler connectivity with Node/pg.
+6. Create a fresh Render web service.
+7. Set production environment variables in Render.
+8. Verify homepage, health checks, database connection, and metadata endpoints.
 
-- `/api/test` => `200`
-- `/api/health/db` => `200`
-- `/api/meta/seasons` => `200`
-- 登入畫面不再只顯示籠統的伺服器失敗
-- 手機使用外部網路開啟正式 PWA URL 時，推薦頁、冷啟動畫面、個人設定與衣櫥頁可正常瀏覽
+## Render Service
 
-## 與第 1 週計畫的關係
+```text
+name: wardrobe-ai-pwa-v2
+url: https://wardrobe-ai-pwa-v2.onrender.com
+branch: master
+build: npm ci && cd mobile && npm ci && npm run build:web
+start: npm start
+health check: /api/test
+```
 
-這個修復工作屬於你 30 天計畫第 1 週的核心，因為 `WARDROBE AI` 是你最主要的展示專案。
+## Verified Endpoints
 
-## 手機隨身展示驗收標準
+```text
+/                         200
+/api/test                 200
+/api/health/config        200
+/api/health/db            200 database connected
+/api/meta/seasons         200
+/api/meta/occasions       200
+/api/meta/materials       200
+```
 
-這個 Render 修復不只是為了讓 API 不報錯，而是為了讓 WARDROBE AI 成為可隨身展示的作品：
+## Notes For Future Deploys
 
-1. 手機瀏覽器可直接開啟正式網址，不需要開本機 server。
-2. 首頁 / PWA 靜態檔可正常載入。
-3. `/api/test`、`/api/health/db`、`/api/meta/seasons` 都回 `200`。
-4. 展示模式或登入後流程可進入核心畫面。
-5. 在外部網路測試通過後，才把 GitHub README 的 Demo URL 標成正式可展示。
+- Keep `DATABASE_URL`, `JWT_SECRET`, and `JWT_REFRESH_SECRET` only in Render environment variables.
+- Do not commit database passwords or JWT secrets.
+- Use the Supabase session pooler for Render instead of the direct database host.
+- If the app is slow on first load, it is likely Render Free cold start. Open it 5-10 minutes before an interview demo.
