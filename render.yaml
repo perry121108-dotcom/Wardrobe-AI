@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: wardrobe-ai
+    name: wardrobe-ai-pwa-v2
     runtime: node
     plan: free
     branch: master
