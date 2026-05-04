@@ -27,7 +27,6 @@ Thumbs.db
 # 測試用暫存腳本（正式上線前可移除）
 run-sql.js
 test-colors.js
-test-v3.4.js
 test_acceptance.js
 test_cold_start.js
 test_market_reality.js
